@@ -1,21 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'chatMessage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 List<ChatMessage> messages = [];
-
-Future<String> getChatbotReply(String userReply) async {
-  var response = await http
-      .get(Uri.parse(
-          "http://api.brainshop.ai/get?bid=167106&key=iABJFJf8sP50MTTg&uid=TimePass&msg=$userReply"))
-      .then((value) => value.body)
-      .catchError((onError) => onError);
-  var data = jsonDecode(response);
-  messages
-      .add(ChatMessage(messageContent: data["cnt"], messageType: "receiver"));
-  return data["cnt"];
-}
 
 class ChatScreenPage extends StatefulWidget {
   @override
@@ -25,7 +14,7 @@ class ChatScreenPage extends StatefulWidget {
 class _ChatScreenPageState extends State<ChatScreenPage> {
   TextEditingController _controller = TextEditingController();
   ScrollController _scrollController = new ScrollController();
-  void ScrollToEnd() {
+  void scrollToEnd() {
     _scrollController.animateTo(
       _scrollController.position.maxScrollExtent + 100,
       curve: Curves.easeOut,
@@ -34,9 +23,10 @@ class _ChatScreenPageState extends State<ChatScreenPage> {
   }
 
   Future<void> fetchdata(userReply) async {
+    await dotenv.load();
     final response = await http.get(
         Uri.parse(
-            "http://api.brainshop.ai/get?bid=167180&key=3K7RpulBiiTIv3V7&uid=Vipul%20Bajaj&msg=${userReply}"),
+            "http://api.brainshop.ai/get?bid=${dotenv.env['B_ID']}&key=${dotenv.env['API_KEY']}&uid=${dotenv.env['USER_ID']}&msg=${userReply}"),
         headers: {
           "Accept": "application/json",
           "Access-Control-Allow-Origin": "*"
@@ -48,7 +38,7 @@ class _ChatScreenPageState extends State<ChatScreenPage> {
           ChatMessage(messageContent: data["cnt"], messageType: "receiver"));
     });
 
-    ScrollToEnd();
+    scrollToEnd();
   }
 
   @override
@@ -172,7 +162,7 @@ class _ChatScreenPageState extends State<ChatScreenPage> {
                 Expanded(
                   child: TextFormField(
                     onTap: () {
-                      ScrollToEnd();
+                      scrollToEnd();
                     },
                     decoration: InputDecoration(
                         contentPadding: EdgeInsets.all(10),
@@ -192,7 +182,7 @@ class _ChatScreenPageState extends State<ChatScreenPage> {
                         messages.add(ChatMessage(
                             messageContent: _controller.text,
                             messageType: "sender"));
-                        ScrollToEnd();
+                        scrollToEnd();
                       });
                       fetchdata(_controller.text);
                       _controller.clear();
