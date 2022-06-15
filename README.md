@@ -1,6 +1,6 @@
 # YANA (You Are Not Alone)
 
-A new Flutter project.
+YANA mobile app is a simple chatbot designed using flutter. It takes user input and fetches reply through an API call.
 
 ## Getting Started
 
